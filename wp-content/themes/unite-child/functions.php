@@ -128,15 +128,7 @@
                 the_excerpt();
                 break;
             case 'genre':
-                $terms = get_the_terms($post->ID, 'genre');
-                $genres = [];
-
-                foreach ($terms as $term) {
-                    $genres[] = $term->name;
-                }
-
-                print implode(', ', $genres);
-
+                print get_taxonomies_imploded($post->ID, 'genre');
                 break;
             case 'ticket_price':
                 $custom = get_post_custom();
@@ -148,4 +140,54 @@
                 break;
         }
     }
+}
+
+{ /* Custom functions */
+
+    function get_taxonomies_imploded($postId, $taxName, $limitQnt = false) {
+        $terms = get_the_terms($postId, $taxName);
+        $taxs = [];
+
+        foreach ($terms as $term) {
+            $taxs[] = $term->name;
+        }
+
+        if ($limitQnt && is_numeric($limitQnt)) {
+            $taxs = array_slice($taxs, 0, $limitQnt);
+        }
+
+        return implode(', ', $taxs);
+    }
+
+}
+
+{/* Get Last posts from Films */
+
+    add_action('pre_get_posts', 'films_pre_posts');
+    /**
+     * Change that query! No need to return anything $q is an object passed by
+     * reference {@link http://php.net/manual/en/language.oop5.references.php}.
+     *
+     * @param   WP_Query $q The query object.
+     * @return  void
+     */
+    function films_pre_posts($q) {
+        // bail if it's the admin, not the main query or isn't the (posts) page.
+        if (is_admin() || !$q->is_main_query() || !is_home())
+            return;
+
+        // whatever type(s) you want.
+        $q->set('post_type', ['films']);
+    }
+}
+
+add_shortcode('last-films', 'last_films_widget');
+
+function last_films_widget() {
+    ob_start();
+    get_template_part('last-films-widget');
+    $template = ob_get_contents();
+    ob_end_clean();
+
+    return $template;
 }
