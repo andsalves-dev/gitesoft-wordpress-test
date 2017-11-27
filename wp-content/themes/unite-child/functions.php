@@ -181,13 +181,16 @@
     }
 }
 
-add_shortcode('last-films', 'last_films_widget');
+{/* adding shortcodes */
 
-function last_films_widget() {
-    ob_start();
-    get_template_part('last-films-widget');
-    $template = ob_get_contents();
-    ob_end_clean();
+    add_shortcode('last-films', 'last_films_widget');
 
-    return $template;
+    function last_films_widget() {
+        ob_start();
+        get_template_part('last-films-widget');
+        $template = ob_get_contents();
+        ob_end_clean();
+
+        return $template;
+    }
 }
